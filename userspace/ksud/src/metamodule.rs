@@ -8,6 +8,7 @@ use anyhow::{Context, Result, ensure};
 use log::{info, warn};
 use std::{
     collections::HashMap,
+    fs,
     path::{Path, PathBuf},
     process::Command,
 };
@@ -231,6 +232,12 @@ pub fn exec_metauninstall_script(module_id: &str) -> Result<()> {
         .env("MODULE_ID", module_id)
         .output()?;
 
+    let err = String::from_utf8_lossy(&result.stderr);
+
+    if fs::exists(defs::METAMODULE_DEBUG)? {
+        fs::write(defs::METAMODULE_METAUNINSTALL_SCRIPT_LOG, err.to_string())?;
+    }
+
     ensure!(
         result.status.success(),
         "Metamodule metauninstall.sh failed for module {module_id}, Err: {}",
@@ -254,6 +261,12 @@ pub fn exec_mount_script(module_dir: &str) -> Result<()> {
         .envs(crate::module::get_common_script_envs())
         .env("MODULE_DIR", module_dir)
         .output()?;
+
+    let err = String::from_utf8_lossy(&result.stderr);
+
+    if fs::exists(defs::METAMODULE_DEBUG)? {
+        fs::write(defs::METAMODULE_MOUNT_SCRIPT_LOG, err.to_string())?;
+    }
 
     ensure!(
         result.status.success(),

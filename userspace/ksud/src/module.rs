@@ -13,7 +13,7 @@ use java_properties::PropertiesIter;
 use log::{debug, info, warn};
 use regex_lite::Regex;
 
-use std::fs::{copy, rename};
+use std::fs::{self, copy, rename};
 use std::{
     collections::HashMap,
     env::var as env_var,
@@ -88,8 +88,15 @@ fn exec_install_script(module_file: &str, is_metamodule: bool) -> Result<()> {
         .envs(get_common_script_envs())
         .env("OUTFD", "1")
         .env("ZIPFILE", realpath)
-        .status()?;
-    ensure!(result.success(), "Failed to install module script");
+        .output()?;
+
+    let err = String::from_utf8_lossy(&result.stderr);
+
+    if fs::exists(defs::METAMODULE_DEBUG)? {
+        fs::write(defs::METAMODULE_METAINSTALL_SCRIPT_LOG, err.to_string())?;
+    }
+
+    ensure!(result.status.success(), "Failed to install module script");
     Ok(())
 }
 
