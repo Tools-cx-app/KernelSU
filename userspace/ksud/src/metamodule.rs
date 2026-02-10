@@ -8,7 +8,7 @@ use anyhow::{Context, Result, ensure};
 use log::{info, warn};
 use std::{
     collections::HashMap,
-    fs,
+    fs::{self, File},
     path::{Path, PathBuf},
     process::Command,
 };
@@ -225,32 +225,28 @@ pub fn exec_metauninstall_script(module_id: &str) -> Result<()> {
 
     info!("Executing metamodule metauninstall.sh for module: {module_id}",);
 
-    let result = Command::new(assets::BUSYBOX_PATH)
-        .args(["sh", metauninstall_path.to_str().unwrap()])
-        .current_dir(metauninstall_path.parent().unwrap())
-        .envs(crate::module::get_common_script_envs())
-        .env("MODULE_ID", module_id)
-        .output()?;
-
-    let err = String::from_utf8_lossy(&result.stderr);
-
-    if fs::exists(defs::METAMODULE_DEBUG)? {
-        fs::write(defs::METAMODULE_METAUNINSTALL_SCRIPT_LOG, err.to_string())?;
     let mut command = Command::new(assets::BUSYBOX_PATH);
-    command.args(["sh", metauninstall_path.to_str().unwrap()])
+    command
+        .args(["sh", metauninstall_path.to_str().unwrap()])
         .current_dir(metauninstall_path.parent().unwrap())
         .envs(crate::module::get_common_script_envs())
         .env("MODULE_ID", module_id);
     if fs::exists(defs::METAMODULE_DEBUG)? {
-        command.stdout(File::open(...)?)
-            .stderr(File::open(...)?);
+        command
+            .stdout(File::open(format!(
+                "{}.out.log",
+                defs::METAMODULE_METAUNINSTALL_SCRIPT_LOG
+            ))?)
+            .stderr(File::open(format!(
+                "{}.err.log",
+                defs::METAMODULE_METAUNINSTALL_SCRIPT_LOG
+            ))?);
     }
     let result = command.status()?;
 
     ensure!(
-        result.status.success(),
-        "Metamodule metauninstall.sh failed for module {module_id}, Err: {}",
-        String::from_utf8_lossy(&result.stderr)
+        result.success(),
+        "Metamodule metauninstall.sh failed for module {module_id}",
     );
 
     info!("Metamodule metauninstall.sh executed successfully for {module_id}",);
@@ -265,23 +261,26 @@ pub fn exec_mount_script(module_dir: &str) -> Result<()> {
 
     info!("Executing mount script for metamodule");
 
-    let result = Command::new(assets::BUSYBOX_PATH)
+    let mut command = Command::new(assets::BUSYBOX_PATH);
+    command
         .args(["sh", mount_script.to_str().unwrap()])
         .envs(crate::module::get_common_script_envs())
-        .env("MODULE_DIR", module_dir)
-        .output()?;
-
-    let err = String::from_utf8_lossy(&result.stderr);
+        .env("MODULE_DIR", module_dir);
 
     if fs::exists(defs::METAMODULE_DEBUG)? {
-        fs::write(defs::METAMODULE_MOUNT_SCRIPT_LOG, err.to_string())?;
+        command
+            .stdout(File::open(format!(
+                "{}.out.log",
+                defs::METAMODULE_MOUNT_SCRIPT_LOG
+            ))?)
+            .stderr(File::open(format!(
+                "{}.err.log",
+                defs::METAMODULE_MOUNT_SCRIPT_LOG
+            ))?);
     }
+    let result = command.status()?;
 
-    ensure!(
-        result.status.success(),
-        "Metamodule mount script failed, Err: {}",
-        String::from_utf8_lossy(&result.stderr)
-    );
+    ensure!(result.success(), "Metamodule mount script failed",);
 
     info!("Metamodule mount script executed successfully");
     Ok(())
