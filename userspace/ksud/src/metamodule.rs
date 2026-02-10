@@ -233,11 +233,11 @@ pub fn exec_metauninstall_script(module_id: &str) -> Result<()> {
         .env("MODULE_ID", module_id);
     if fs::exists(defs::METAMODULE_DEBUG)? {
         command
-            .stdout(File::open(format!(
+            .stdout(File::create(format!(
                 "{}.out.log",
                 defs::METAMODULE_METAUNINSTALL_SCRIPT_LOG
             ))?)
-            .stderr(File::open(format!(
+            .stderr(File::create(format!(
                 "{}.err.log",
                 defs::METAMODULE_METAUNINSTALL_SCRIPT_LOG
             ))?);
@@ -269,11 +269,11 @@ pub fn exec_mount_script(module_dir: &str) -> Result<()> {
 
     if fs::exists(defs::METAMODULE_DEBUG)? {
         command
-            .stdout(File::open(format!(
+            .stdout(File::create(format!(
                 "{}.out.log",
                 defs::METAMODULE_MOUNT_SCRIPT_LOG
             ))?)
-            .stderr(File::open(format!(
+            .stderr(File::create(format!(
                 "{}.err.log",
                 defs::METAMODULE_MOUNT_SCRIPT_LOG
             ))?);
