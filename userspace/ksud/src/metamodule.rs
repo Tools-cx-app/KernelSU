@@ -236,7 +236,16 @@ pub fn exec_metauninstall_script(module_id: &str) -> Result<()> {
 
     if fs::exists(defs::METAMODULE_DEBUG)? {
         fs::write(defs::METAMODULE_METAUNINSTALL_SCRIPT_LOG, err.to_string())?;
+    let mut command = Command::new(assets::BUSYBOX_PATH);
+    command.args(["sh", metauninstall_path.to_str().unwrap()])
+        .current_dir(metauninstall_path.parent().unwrap())
+        .envs(crate::module::get_common_script_envs())
+        .env("MODULE_ID", module_id);
+    if fs::exists(defs::METAMODULE_DEBUG)? {
+        command.stdout(File::open(...)?)
+            .stderr(File::open(...)?);
     }
+    let result = command.status()?;
 
     ensure!(
         result.status.success(),
