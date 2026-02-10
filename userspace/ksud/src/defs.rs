@@ -39,7 +39,7 @@ mod android {
     pub const METAMODULE_MOUNT_SCRIPT_LOG: &str = concatcp!(LOG_DIR, "metamodule_mount");
     pub const METAMODULE_METAUNINSTALL_SCRIPT_LOG: &str =
         concatcp!(LOG_DIR, "metamodule_metauninstall");
-    pub const METAMODULE_DEBUG: &str = concatcp!(WORKING_DIR, "metamodule.debug");
+    pub const METAMODULE_DEBUG: &str = concatcp!(WORKING_DIR, ".enable_script_debug");
 
     pub const KSU_BACKUP_DIR: &str = WORKING_DIR;
     pub const KSU_BACKUP_FILE_PREFIX: &str = "ksu_backup_";
