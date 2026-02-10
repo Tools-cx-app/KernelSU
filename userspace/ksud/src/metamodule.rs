@@ -246,7 +246,7 @@ pub fn exec_metauninstall_script(module_id: &str) -> Result<()> {
 
     ensure!(
         result.success(),
-        "Metamodule metauninstall.sh failed for module {module_id}",
+        "Metamodule metauninstall.sh failed for module {module_id}, status: {result:?}",
     );
 
     info!("Metamodule metauninstall.sh executed successfully for {module_id}",);
@@ -280,7 +280,10 @@ pub fn exec_mount_script(module_dir: &str) -> Result<()> {
     }
     let result = command.status()?;
 
-    ensure!(result.success(), "Metamodule mount script failed",);
+    ensure!(
+        result.success(),
+        "Metamodule mount script failed, status: {result:?}"
+    );
 
     info!("Metamodule mount script executed successfully");
     Ok(())
