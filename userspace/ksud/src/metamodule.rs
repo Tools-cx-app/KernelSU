@@ -267,7 +267,7 @@ pub fn exec_mount_script(module_dir: &str) -> Result<()> {
         .envs(crate::module::get_common_script_envs())
         .env("MODULE_DIR", module_dir);
 
-    if fs::exists(defs::METAMODULE_DEBUG)? {
+    if Path::new(defs::METAMODULE_DEBUG).exists() {
         command
             .stdout(File::create(format!(
                 "{}.out.log",
